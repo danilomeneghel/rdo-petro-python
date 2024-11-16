@@ -1,0 +1,11 @@
+mysql-connector-python
+openpyxl
+pandas
+tk
+
+# ATENÇÃO: O pacote 'tkinter' deve ser instalado diretamente no sistema operacional.
+# Para Ubuntu/Debian:
+# sudo apt-get install python3-tk
+# Para Fedora/CentOS:
+# sudo dnf install python3-tkinter
+# Para Windows/macOS, o tkinter já deve vir com o Python.
