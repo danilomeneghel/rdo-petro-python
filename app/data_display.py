@@ -22,15 +22,17 @@ class DataDisplay:
         filter_frame = tk.Frame(self.panel)
         filter_frame.pack(pady=10)
 
+        # Filtro de valor
         self.filter_value = tk.Entry(filter_frame, width=25)
         self.filter_value.pack(side="left", padx=5)
 
-        # Atualizando os rótulos do ComboBox para exibir "Nro RDO", "Data RDO" e "Nro Contrato"
+        # Filtro de tipo
         self.filter_type = ttk.Combobox(filter_frame, values=["Nro RDO", "Data RDO", "Nro Contrato"], width=15)
         self.filter_type.set("Nro RDO")  # Valor padrão
         self.filter_type.pack(side="left", padx=5)
 
-        self.search_button = tk.Button(filter_frame, text="Buscar", command=self.load_data)
+        # Botão de busca
+        self.search_button = tk.Button(filter_frame, text="Buscar", command=self.load_data, bg="green", fg="white")
         self.search_button.pack(side="left", padx=5)
 
         # Tabela
@@ -48,28 +50,45 @@ class DataDisplay:
         for col in self.tree['columns']:
             self.tree.heading(col, text=col)
 
-    def format_date(self, date_value):
+        # Variáveis de paginação
+        self.current_page = 1
+        self.records_per_page = 10
+        self.total_records = 0
+        self.total_pages = 0
+        self.filter_value_text = ""
+        self.filter_type_text = "Nro RDO"
+
+        # Barra de navegação (rodapé da tabela)
+        self.pagination_frame = tk.Frame(self.panel)
+        self.pagination_frame.pack(pady=10)
+
+        self.prev_button = tk.Button(self.pagination_frame, text="<< Anterior", command=self.previous_page, state="disabled")
+        self.prev_button.pack(side="left", padx=5)
+
+        self.page_label = tk.Label(self.pagination_frame, text="Página 1 de 1")
+        self.page_label.pack(side="left", padx=5)
+
+        self.next_button = tk.Button(self.pagination_frame, text="Próximo >>", command=self.next_page, state="disabled")
+        self.next_button.pack(side="left", padx=5)
+
+    def convert_to_mysql_date(self, date_str):
         """
-        Converte uma data para o formato DD/MM/YYYY
+        Converte uma data no formato dd/mm/yyyy para o formato YYYY-MM-DD usado no MySQL
         """
-        if isinstance(date_value, str):
-            # Tenta converter string no formato "YYYY-MM-DD" para "DD/MM/YYYY"
-            try:
-                date_obj = datetime.strptime(date_value, "%Y-%m-%d")
-                return date_obj.strftime("%d/%m/%Y")
-            except ValueError:
-                return date_value  # Retorna o valor sem alterações se não for uma data válida
-        elif isinstance(date_value, datetime):
-            return date_value.strftime("%d/%m/%Y")  # Converte datetime para o formato desejado
-        return date_value  # Se for outro tipo, retorna sem alterações
+        try:
+            date_obj = datetime.strptime(date_str, "%d/%m/%Y")
+            return date_obj.strftime("%Y-%m-%d")
+        except ValueError:
+            return None  # Retorna None se a data estiver em formato inválido
 
     def load_data(self):
         # Limpar dados existentes
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        filter_value = self.filter_value.get().strip()
-        filter_type = self.filter_type.get()
+        # Captura o valor do filtro
+        self.filter_value_text = self.filter_value.get().strip()
+        self.filter_type_text = self.filter_type.get()
 
         # Mapeamento entre o valor legível do ComboBox e o nome da coluna no banco de dados
         filter_mapping = {
@@ -77,6 +96,13 @@ class DataDisplay:
             "Data RDO": "r.data",
             "Nro Contrato": "rc.nro_contrato"
         }
+
+        # Se o filtro for do tipo Data RDO, convertemos a data para o formato MySQL
+        if self.filter_type_text == "Data RDO" and self.filter_value_text:
+            self.filter_value_text = self.convert_to_mysql_date(self.filter_value_text)
+            if not self.filter_value_text:
+                messagebox.showerror("Erro", "Data inválida. Use o formato dd/mm/yyyy.")
+                return
 
         connection = None
         try:
@@ -88,39 +114,50 @@ class DataDisplay:
 
             cursor = connection.cursor(dictionary=True)
 
-            # Se o valor do filtro for fornecido, ajusta a consulta
-            if filter_value:
+            # Calculando o offset para paginação
+            offset = (self.current_page - 1) * self.records_per_page
+
+            # Consulta para buscar os dados com paginação e filtro
+            if self.filter_value_text:
                 query = f"""
-                    SELECT r.nro_rdo, r.data, rc.nro_contrato, rc.inicio_contrato, rc.termino_contrato
+                    SELECT r.nro_rdo, 
+                           DATE_FORMAT(r.data, '%d/%m/%Y') AS data_rdo, 
+                           rc.nro_contrato, 
+                           DATE_FORMAT(rc.inicio_contrato, '%d/%m/%Y') AS inicio_contrato, 
+                           DATE_FORMAT(rc.termino_contrato, '%d/%m/%Y') AS termino_contrato
                     FROM rdo r
                     JOIN rdo_contrato rc ON r.id = rc.id_rdo
-                    WHERE {filter_mapping[filter_type]} = %s
+                    WHERE {filter_mapping[self.filter_type_text]} = %s
+                    LIMIT %s OFFSET %s
                 """
-                cursor.execute(query, (filter_value,))
+                cursor.execute(query, (self.filter_value_text, self.records_per_page, offset))
             else:
-                query = """
-                    SELECT r.nro_rdo, r.data, rc.nro_contrato, rc.inicio_contrato, rc.termino_contrato
+                query = f"""
+                    SELECT r.nro_rdo, 
+                           DATE_FORMAT(r.data, '%d/%m/%Y') AS data_rdo, 
+                           rc.nro_contrato, 
+                           DATE_FORMAT(rc.inicio_contrato, '%d/%m/%Y') AS inicio_contrato, 
+                           DATE_FORMAT(rc.termino_contrato, '%d/%m/%Y') AS termino_contrato
                     FROM rdo r
                     JOIN rdo_contrato rc ON r.id = rc.id_rdo
+                    LIMIT %s OFFSET %s
                 """
-                cursor.execute(query)
+                cursor.execute(query, (self.records_per_page, offset))
 
             rows = cursor.fetchall()
 
             for row in rows:
-                # Converte as datas para o formato DD/MM/YYYY antes de adicionar na tabela
-                data_rdo = self.format_date(row["data"])
-                inicio_contrato = self.format_date(row["inicio_contrato"])
-                termino_contrato = self.format_date(row["termino_contrato"])
-
-                # Insere os dados formatados na tabela
+                # Insere os dados já com as datas formatadas
                 self.tree.insert("", "end", values=(
                     row["nro_rdo"],
-                    data_rdo,  # Data formatada
+                    row["data_rdo"],  # Data já formatada
                     row["nro_contrato"],
-                    inicio_contrato,  # Início contrato formatado
-                    termino_contrato   # Término contrato formatado
+                    row["inicio_contrato"],  # Início contrato já formatado
+                    row["termino_contrato"]   # Término contrato já formatado
                 ))
+
+            # Atualizar a navegação de página
+            self.update_pagination()
 
         except mysql.connector.Error as e:
             logger.error(f"Erro ao carregar os dados: {e}")
@@ -128,6 +165,75 @@ class DataDisplay:
         finally:
             if connection:
                 connection.close()
+
+    def update_pagination(self):
+        """
+        Atualiza a navegação de página e calcula o número total de páginas.
+        """
+        connection = None
+        try:
+            connection = self.connect()
+            if connection is None:
+                return
+
+            cursor = connection.cursor(dictionary=True)
+
+            # Consulta para contar o número total de registros, considerando o filtro
+            filter_mapping = {
+                "Nro RDO": "r.nro_rdo",
+                "Data RDO": "r.data",
+                "Nro Contrato": "rc.nro_contrato"
+            }
+
+            if self.filter_value_text:
+                query = f"""
+                    SELECT COUNT(*) AS total_records
+                    FROM rdo r
+                    JOIN rdo_contrato rc ON r.id = rc.id_rdo
+                    WHERE {filter_mapping[self.filter_type_text]} = %s
+                """
+                cursor.execute(query, (self.filter_value_text,))
+            else:
+                query = """
+                    SELECT COUNT(*) AS total_records
+                    FROM rdo r
+                    JOIN rdo_contrato rc ON r.id = rc.id_rdo
+                """
+                cursor.execute(query)
+
+            total = cursor.fetchone()
+            self.total_records = total["total_records"]
+            self.total_pages = (self.total_records // self.records_per_page) + (1 if self.total_records % self.records_per_page > 0 else 0)
+
+            # Atualizar o rótulo de paginação
+            self.page_label.config(text=f"Página {self.current_page} de {self.total_pages}")
+
+            # Habilitar/Desabilitar botões de navegação
+            if self.current_page == 1:
+                self.prev_button.config(state="disabled")
+            else:
+                self.prev_button.config(state="normal")
+
+            if self.current_page == self.total_pages or self.total_pages == 0:
+                self.next_button.config(state="disabled")
+            else:
+                self.next_button.config(state="normal")
+
+        except mysql.connector.Error as e:
+            logger.error(f"Erro ao contar registros: {e}")
+        finally:
+            if connection:
+                connection.close()
+
+    def previous_page(self):
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.load_data()
+
+    def next_page(self):
+        if self.current_page < self.total_pages:
+            self.current_page += 1
+            self.load_data()
 
     def connect(self):
         return mysql.connector.connect(

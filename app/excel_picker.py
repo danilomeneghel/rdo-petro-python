@@ -20,7 +20,7 @@ class ExcelPicker:
         self.file_path_field.config(state="readonly")
         self.file_path_field.pack(side="left", padx=5)  # Alinha à esquerda
 
-        self.select_button = tk.Button(file_select_frame, text="Selecione", command=self.select_file, bg="#4CAF50", fg="white")
+        self.select_button = tk.Button(file_select_frame, text="Selecione", command=self.select_file, bg="green", fg="white")
         self.select_button.pack(side="left", padx=5)  # Alinha à direita do campo
 
         self.import_button = tk.Button(self.panel, text="Importar", command=self.import_data, bg="#008CBA", fg="white")
