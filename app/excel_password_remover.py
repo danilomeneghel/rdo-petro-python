@@ -6,7 +6,11 @@ from app.convert_xlsm_to_csv import convert_xlsm_to_csv
 class ExcelPasswordRemover:
     @staticmethod
     def convert_file(input_file):
-        dir_planilha = "planilha/"
+        # Criação do diretório para armazenar planilha, caso não exista
+        dir_planilha = 'planilha/'
+        if not os.path.exists(dir_planilha):
+            os.makedirs(dir_planilha)
+
         current_date_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_file = f"{dir_planilha}rdo_sem_bloqueio_{current_date_time}.csv"
 
