@@ -16,5 +16,5 @@ def show_home(frame):
     footer_frame.pack(side=tk.BOTTOM, fill=tk.X)  # Posiciona o rodapé na parte inferior
 
     # Label para a versão
-    version_label = tk.Label(footer_frame, text="Versão 1.1.3", font=("Arial", 10), bg="#d3d3d3")
+    version_label = tk.Label(footer_frame, text="Versão 1.1.5", font=("Arial", 10), bg="#d3d3d3")
     version_label.pack(side=tk.BOTTOM, pady=5)  # Ajusta o padding para centralizar a label no rodapé
