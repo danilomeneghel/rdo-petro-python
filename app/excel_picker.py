@@ -3,7 +3,7 @@ from tkinter import filedialog, messagebox
 from app.excel_password_remover import ExcelPasswordRemover
 from app.excel_importer import ExcelImporter
 from app.data_persister import DataPersister
-import app.database_connection as db  # Importa a classe DatabaseConnection
+import app.database_connection as db
 
 class ExcelPicker:
     def __init__(self, root):

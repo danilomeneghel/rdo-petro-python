@@ -1,12 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import logging
+from logger_config import logger
 from datetime import datetime
 import mysql.connector
-
-# Configuração do logger
-logger = logging.getLogger('DataDisplay')
-logger.setLevel(logging.INFO)
 
 class DataDisplay:
     def __init__(self, root, db_connection):

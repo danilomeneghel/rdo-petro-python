@@ -1,12 +1,8 @@
 import csv
 from datetime import datetime
-import logging
+from logger_config import logger
 from tkinter import messagebox
 from app.rdo_entities import RdoEntity, RdoContractEntity
-
-# Configuração do logger
-logger = logging.getLogger('ExcelImporter')
-logger.setLevel(logging.INFO)
 
 class ExcelImporter:
     def get_rdo_data(self, file_path):

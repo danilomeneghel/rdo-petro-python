@@ -1,0 +1,4 @@
+2024-11-16 17:39:57,567 - DataDisplay - INFO - Arquivo convertido com sucesso! Arquivo salvo em: planilha/rdo_sem_bloqueio_20241116_173955.csv
+2024-11-16 17:39:57,568 - DataDisplay - INFO - Data RDO: 28/09/2024
+2024-11-16 17:39:57,577 - DataDisplay - INFO - Nro RDO: 1133
+2024-11-16 17:39:57,645 - DataDisplay - ERROR - O RDO com o número 1133 já foi importado.

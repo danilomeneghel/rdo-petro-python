@@ -1,11 +1,7 @@
 import os
 from datetime import datetime
-import logging
+from logger_config import logger
 from app.convert_xlsm_to_csv import convert_xlsm_to_csv
-
-# Configuração do logger
-logger = logging.getLogger('ExcelPasswordRemover')
-logger.setLevel(logging.INFO)
 
 class ExcelPasswordRemover:
     @staticmethod

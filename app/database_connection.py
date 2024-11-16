@@ -1,4 +1,5 @@
 import mysql.connector
+from logger_config import logger
 
 class DatabaseConnection:
     def __init__(self, host="localhost", database="rdo_petro", user="root", password=""):
@@ -18,4 +19,5 @@ class DatabaseConnection:
             return connection
         except mysql.connector.Error as e:
             print(f"Erro ao conectar ao banco de dados: {e}")
+            logger.error(f"Erro ao conectar ao banco de dados {self.database} no host {self.host}: {e}")
             return None

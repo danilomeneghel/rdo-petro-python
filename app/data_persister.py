@@ -1,11 +1,7 @@
 from tkinter import messagebox
-import logging
+from logger_config import logger
 import mysql.connector
-import app.database_connection as db  # Importa a classe DatabaseConnection
-
-# Configuração do logger para a classe DataPersister
-logger = logging.getLogger('DataPersister')
-logger.setLevel(logging.INFO)
+import app.database_connection as db
 
 class DataPersister:
     def __init__(self, db_connection: db.DatabaseConnection):
