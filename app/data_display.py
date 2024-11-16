@@ -52,7 +52,7 @@ class DataDisplay:
 
         # Variáveis de paginação
         self.current_page = 1
-        self.records_per_page = 10
+        self.records_per_page = 20  # Alterado para 20 registros por página
         self.total_records = 0
         self.total_pages = 0
         self.filter_value_text = ""
@@ -70,6 +70,10 @@ class DataDisplay:
 
         self.next_button = tk.Button(self.pagination_frame, text="Próximo >>", command=self.next_page, state="disabled")
         self.next_button.pack(side="left", padx=5)
+
+        # Label para mostrar o total de registros carregados
+        self.total_label = tk.Label(self.pagination_frame, text="Total de registros: 0")
+        self.total_label.pack(side="left", padx=5)
 
     def convert_to_mysql_date(self, date_str):
         """
@@ -156,7 +160,7 @@ class DataDisplay:
                     row["termino_contrato"]   # Término contrato já formatado
                 ))
 
-            # Atualizar a navegação de página
+            # Atualizar a navegação de página e o total de registros
             self.update_pagination()
 
         except mysql.connector.Error as e:
@@ -207,6 +211,7 @@ class DataDisplay:
 
             # Atualizar o rótulo de paginação
             self.page_label.config(text=f"Página {self.current_page} de {self.total_pages}")
+            self.total_label.config(text=f"Total de registros: {self.total_records}")
 
             # Habilitar/Desabilitar botões de navegação
             if self.current_page == 1:
