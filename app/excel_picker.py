@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox
 from app.excel_password_remover import ExcelPasswordRemover
 from app.excel_importer import ExcelImporter
 from app.data_persister import DataPersister
+import app.database_connection as db  # Importa a classe DatabaseConnection
 
 class ExcelPicker:
     def __init__(self, root):
@@ -20,7 +21,7 @@ class ExcelPicker:
         self.file_path_field.config(state="readonly")
         self.file_path_field.pack(side="left", padx=5)  # Alinha à esquerda
 
-        self.select_button = tk.Button(file_select_frame, text="Selecione", command=self.select_file, bg="green", fg="white")
+        self.select_button = tk.Button(file_select_frame, text="Selecione", command=self.select_file, bg="#4CAF50", fg="white")
         self.select_button.pack(side="left", padx=5)  # Alinha à direita do campo
 
         self.import_button = tk.Button(self.panel, text="Importar", command=self.import_data, bg="#008CBA", fg="white")
@@ -50,7 +51,11 @@ class ExcelPicker:
             rdo_contract_data = excel_importer.get_rdo_contract_data(converted_file_path)
 
             if rdo_data and rdo_contract_data:
-                data_persister = DataPersister()
+                # Cria a instância de DatabaseConnection
+                db_connection = db.DatabaseConnection()
+
+                # Passa a instância de DatabaseConnection para o DataPersister
+                data_persister = DataPersister(db_connection)
                 data_persister.persist_data(rdo_data, rdo_contract_data)
             else:
                 messagebox.showerror("Erro", "Falha ao processar os dados do arquivo.")

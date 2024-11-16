@@ -1,16 +1,17 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import logging
-import mysql.connector
 from datetime import datetime
+import mysql.connector
 
 # Configuração do logger
 logger = logging.getLogger('DataDisplay')
 logger.setLevel(logging.INFO)
 
 class DataDisplay:
-    def __init__(self, root):
+    def __init__(self, root, db_connection):
         self.root = root
+        self.db_connection = db_connection
         self.panel = tk.Frame(self.root)
         self.panel.pack(fill='both', expand=True)
 
@@ -32,7 +33,7 @@ class DataDisplay:
         self.filter_type.pack(side="left", padx=5)
 
         # Botão de busca
-        self.search_button = tk.Button(filter_frame, text="Buscar", command=self.load_data, bg="green", fg="white")
+        self.search_button = tk.Button(filter_frame, text="Buscar", command=self.load_data, bg="#4CAF50", fg="white")
         self.search_button.pack(side="left", padx=5)
 
         # Tabela
@@ -110,7 +111,7 @@ class DataDisplay:
 
         connection = None
         try:
-            connection = self.connect()
+            connection = self.db_connection.connect()
             if connection is None:
                 logger.info("Falha ao estabelecer conexão com o banco de dados.")
                 messagebox.showerror("Erro", "Falha ao estabelecer conexão com o banco de dados.")
@@ -176,7 +177,7 @@ class DataDisplay:
         """
         connection = None
         try:
-            connection = self.connect()
+            connection = self.db_connection.connect()
             if connection is None:
                 return
 
@@ -240,16 +241,9 @@ class DataDisplay:
             self.current_page += 1
             self.load_data()
 
-    def connect(self):
-        return mysql.connector.connect(
-            host="localhost",
-            database="rdo_petro",
-            user="root",
-            password=""
-        )
-
-def show_data_display(frame):
+# Função que chama a exibição da tela de dados
+def show_data_display(frame, db_connection):
     """Exibe a tela de listagem de dados"""
-    data_display = DataDisplay(frame)
+    data_display = DataDisplay(frame, db_connection)
     data_display.load_data()
     data_display.panel.pack(fill="both", expand=True)

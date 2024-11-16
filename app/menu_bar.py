@@ -1,5 +1,6 @@
 import tkinter as tk
 import app.frame  # Importa o módulo com as configurações da janela principal
+import app.database_connection as db  # Importa a classe DatabaseConnection
 
 class MenuBar:
     def __init__(self, root):
@@ -39,8 +40,13 @@ class MenuBar:
     def list_data(self):
         """Carrega a tela de Listagem de dados e limpa qualquer outra tela anterior"""
         self.clear_frame()
+
+        # Cria a instância de DatabaseConnection
+        db_connection = db.DatabaseConnection()
+
         import app.data_display
-        app.data_display.show_data_display(self.frame.main_frame)
+        # Passa a instância db_connection para o método show_data_display
+        app.data_display.show_data_display(self.frame.main_frame, db_connection)
 
     def exit_program(self):
         """Fecha o programa"""
