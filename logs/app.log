@@ -1,0 +1,4 @@
+2024-11-17 14:01:34,480 - DataDisplay - ERROR - Erro ao conectar ao banco de dados rdo_petro no host localhost: 1698 (28000): Access denied for user 'root'@'localhost'
+2024-11-17 14:01:34,480 - DataDisplay - INFO - Falha ao estabelecer conexão com o banco de dados.
+2024-11-17 14:02:11,418 - DataDisplay - ERROR - Erro ao conectar ao banco de dados rdo_petro no host localhost: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (111)
+2024-11-17 14:02:11,418 - DataDisplay - INFO - Falha ao estabelecer conexão com o banco de dados.
